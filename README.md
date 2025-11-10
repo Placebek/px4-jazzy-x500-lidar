@@ -1,63 +1,82 @@
-# px4-jazzy-gazebo-yolov8
-Обнаружение объектов с воздуха с помощью дрона на базе PX4 Autopilot и ROS 2. Для симуляции используется PX4 SITL и Gazebo Harmonic. YOLOv8 применяется для обнаружения объектов.
+
+---
+
+# 🛰 Autonomous Inventory Drone (LiDAR Simulation)
+
+**Описание проекта**
+Данный проект демонстрирует интеграцию **2D LiDAR-сенсора** с дроном **Holybro X500** в симуляции **Gazebo Harmonic** с использованием **ROS 2 Jazzy** и **PX4 Autopilot v1.15.0**.
+Цель текущего этапа — **настройка подключения LiDAR и визуализация данных сканирования** через `rviz2`.
+Функции распознавания объектов и штрих-кодов будут добавлены на следующих этапах разработки.
 
 ---
 
 ## 🙏 Благодарность
-Особая благодарность пользователю [**monemati**](https://github.com/monemati) за его репозиторий,  
-который послужил основой и вдохновением для этого проекта.
+
+Благодарность пользователю [**monemati**](https://github.com/monemati) за репозиторий [RTABMap-ROS2-PX4](https://github.com/monemati/RTABMap-ROS2-PX4), послуживший основой для интеграции ROS 2, PX4 и Gazebo.
 
 ---
 
 ## 🎥 Демо проекта
-[![Смотреть демо](https://img.youtube.com/vi/YEABogRBKM4/hqdefault.jpg)](https://youtu.be/YEABogRBKM4)
+[![Смотреть демо](https://img.youtube.com/vi/hLpDUYaxzWk/hqdefault.jpg)](https://youtu.be/hLpDUYaxzWk)
 
-## Установка (нативно, без Docker)
-Проект протестирован на **Ubuntu 24.04 LTS (Noble)** с ROS 2 Jazzy и Gazebo Harmonic. Используйте PX4-Autopilot v1.15.0.
 
-### Создайте виртуальное окружение
-```commandline
-# Создать
+## ⚙️ Среда тестирования
+
+* **ОС**: Ubuntu 24.04 LTS (Noble)
+* **ROS 2**: Jazzy Jalisco
+* **Gazebo**: Harmonic
+* **PX4-Autopilot**: v1.15.0
+
+---
+
+## 🔧 Установка
+
+### 1. Создать виртуальное окружение
+
+```bash
 python3 -m venv ~/px4-venv
-
-# Активировать (в каждом терминале)
 source ~/px4-venv/bin/activate
 ```
 
-### Клонируйте репозиторий
-```commandline
-git clone https://github.com/Placebek/px4-jazzy-gazebo-yolov8
-cd PX4-ROS2-Gazebo-YOLOv8
+### 2. Клонировать проект
+
+```bash
+git clone https://github.com/Placebek/px4-jazzy-gazebo-lidar.git
+cd px4-jazzy-gazebo-lidar
 ```
 
-### Установите PX4-Autopilot (v1.15.0)
-```commandline
+### 3. Установить PX4-Autopilot (v1.15.0)
+
+```bash
 cd ~
 git clone https://github.com/PX4/PX4-Autopilot.git --recursive -b v1.15.0
 cd PX4-Autopilot
-bash ./Tools/setup/ubuntu.sh  # Установит зависимости, включая Gazebo Harmonic
-make px4_sitl  # Сборка SITL
+bash ./Tools/setup/ubuntu.sh
+make px4_sitl
 ```
 
-### Установите ROS 2 Jazzy
-```commandline
-sudo apt update && sudo apt install locales
+### 4. Установить ROS 2 Jazzy
+
+```bash
+sudo apt update && sudo apt install locales -y
 sudo locale-gen en_US en_US.UTF-8
 sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 export LANG=en_US.UTF-8
-sudo apt install software-properties-common
+
+sudo apt install software-properties-common curl -y
 sudo add-apt-repository universe
-sudo apt update && sudo apt install curl -y
 sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu noble main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
 sudo apt update && sudo apt upgrade -y
-sudo apt install ros-jazzy-desktop ros-jazzy-ros-gz-bridge ros-dev-tools
-source /opt/ros/jazzy/setup.bash && echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
-pip install --user -U empy pyros-genmsg setuptools
+sudo apt install ros-jazzy-desktop ros-jazzy-ros-gz-bridge ros-dev-tools ros-jazzy-rtabmap-ros -y
+echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+source ~/.bashrc
 ```
 
-### Установите Micro XRCE-DDS Agent
-```commandline
+### 5. Установить Micro XRCE-DDS Agent
+
+```bash
 cd ~
 git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
 cd Micro-XRCE-DDS-Agent
@@ -68,84 +87,109 @@ sudo make install
 sudo ldconfig /usr/local/lib/
 ```
 
-### Установите MAVSDK и YOLOv8
-```commandline
-source ~/px4-venv/bin/activate
-pip install mavsdk aioconsole pygame "numpy==1.26.4" "opencv-python==4.9.0.80" ultralytics
-```
+---
 
-### Дополнительные конфиги
-- Добавьте в `~/.bashrc`:
-```commandline
+## ⚙️ Конфигурация PX4 и моделей
+
+Добавьте в `~/.bashrc`:
+
+```bash
 source /opt/ros/jazzy/setup.bash
-export GZ_SIM_RESOURCE_PATH=~/PX4-Autopilot/Tools/simulation/gz/models  # Для моделей Gazebo Harmonic
+export GZ_SIM_RESOURCE_PATH=/opt/ros/jazzy/share:~/PX4-Autopilot/Tools/simulation/gz/models:~/px4-jazzy-gazebo-lidar/models
 export GZ_SIM_WORLD_PATH=~/PX4-Autopilot/Tools/simulation/gz/worlds
 ```
-  Затем: `source ~/.bashrc`
 
-- Скопируйте модели:
-```commandline
-cp -r ~/px4-jazzy-gazebo-yolov8/models/* ~/PX4-Autopilot/Tools/simulation/gz/models
+Затем:
+
+```bash
+source ~/.bashrc
 ```
 
-- Скопируйте мир:
-```commandline
-cp ~/px4-jazzy-gazebo-yolov8/worlds/default.sdf ~/PX4-Autopilot/Tools/simulation/gz/worlds/
+Скопируйте модели и миры:
+
+```bash
+cp -f ~/px4-jazzy-gazebo-lidar/models/* ~/PX4-Autopilot/Tools/simulation/gz/models
+cp -f ~/px4-jazzy-gazebo-lidar/worlds/* ~/PX4-Autopilot/Tools/simulation/gz/worlds
+cp -f ~/px4-jazzy-gazebo-lidar/airframes/* ~/PX4-Autopilot/ROMFS/px4fmu_common/init.d-posix/airframes
 ```
 
-- Измените угол камеры дрона (для лучшего обзора):
-  Откройте `~/PX4-Autopilot/Tools/simulation/gz/models/x500_vision/model.sdf` (или x500_depth), найдите `<pose>` в строке с камерой и замените на:
-```xml
-<pose>0.15 0.029 0.21 0 0.7854 0</pose>
+Пересоберите PX4:
+
+```bash
+cd ~/PX4-Autopilot
+make px4_sitl
 ```
-  Пересоберите PX4: `cd ~/PX4-Autopilot && make px4_sitl`.
 
+---
 
-## Запуск
-Используйте **модель `x500_vision`** (airframe 4001) или `x500_depth` (4002) с RGB-камерой.
+## 🚀 Запуск симуляции LiDAR
 
-### Полёт с клавиатуры
-Откройте 5 терминалов. Активируйте venv где нужно: `source ~/px4-venv/bin/activate`.
+### Терминал 1 — Micro XRCE Agent
 
-```commandline
-# Терминал 1: Agent
+```bash
 cd ~/Micro-XRCE-DDS-Agent/build
 ./MicroXRCEAgent udp4 -p 8888
+```
 
-# Терминал 2: PX4 + Gazebo (пример для x500_depth)
+### Терминал 2 — PX4 + Gazebo
+
+```bash
 cd ~/PX4-Autopilot
-PX4_SYS_AUTOSTART=4001 PX4_GZ_MODEL_POSE="268.08,-128.22,3.86,0.00,0,-0.7" PX4_GZ_MODEL=x500_depth make px4_sitl gz_x500_depth
+PX4_SYS_AUTOSTART=4012 PX4_GZ_WORLD=warehouse PX4_GZ_MODEL=x500_lidar make px4_sitl gz_x500_lidar
+```
 
-# Терминал 3: Bridge для камеры
-ros2 run ros_gz_bridge parameter_bridge /camera@sensor_msgs/msg/Image@gz.msgs.Image
+### Терминал 3 — ROS-мост для LiDAR
 
-# Терминал 4: YOLO-детекция
-cd ~/px4-jazzy-gazebo-yolov8
-python uav_camera_det.py  # Или упрощённая версия без cv_bridge
+```bash
+ros2 run ros_gz_bridge parameter_bridge /world/warehouse/model/x500_lidar_0/link/link/sensor/lidar_2d_v2/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan /camera@sensor_msgs/msg/Image@gz.msgs.Image
+```
 
-# Терминал 5: Управление клавиатурой
+# Терминал 4 — Запуск окно управление дроном 
+```bash
 cd ~/px4-jazzy-gazebo-yolov8
 python keyboard-mavsdk-test.py
 ```
-- Кликните на пустое окно клавиатуры.
-- `r` — взлёт и arm.
-- WASD / стрелки — движение.
-- `l` — посадка.
+ - Нажмите `r` для взлёта, `WASD` для движения, `l` для посадки в `avoidance_mavsdk.py` (если интегрировано).
 
-### Полёт через ROS 2 (offboard)
-Аналогично, но в Терминале 5:
-```commandline
-# Сначала соберите ws_offboard_control (если нужно, клонируйте px4_ros_com и px4_msgs в ~/ws_offboard_control/src, colcon build)
-cd ~/ws_offboard_control
-source install/local_setup.bash
-ros2 run px4_ros_com offboard_control
+
+### Проверка топиков
+
+```bash
+ros2 topic list
 ```
-(Поза: измените на "283.08,-136.22,3.86,0.00,0,-0.7" для избежания столкновений.)
 
-## Источники
-- https://github.com/PX4/PX4-Autopilot
-- https://docs.px4.io/main/en/ros2/user_guide
-- https://stepik.org/course/221157/info
-- https://github.com/ultralytics/ultralytics
-- https://www.ros.org/
-- https://gazebosim.org/
+Должен появиться топик:
+
+```
+/world/warehouse/model/x500_lidar_0/link/link/sensor/lidar_2d_v2/scan
+```
+
+---
+
+## 👁️ Визуализация данных LiDAR в RViz2
+
+```bash
+rviz2
+```
+
+1. В левом верхнем углу установите **Fixed Frame** = тот, что указан в `ros2 topic echo` (обычно `link`).
+2. Нажмите **Add → By topic → LaserScan** и выберите топик `/world/warehouse/model/x500_lidar_0/link/link/sensor/lidar_2d_v2/scan`.
+3. Настройте параметры:
+
+   * **Decay Time**: `0.1`
+   * **Size (Meters)**: `0.01`
+   * **Alpha**: `0.5`
+
+Если ничего не отображается — убедитесь, что сенсор включён и топик публикуется.
+
+---
+
+## 📚 Источники
+
+* [PX4-Autopilot](https://github.com/PX4/PX4-Autopilot)
+* [ROS 2 Jazzy](https://docs.ros.org/en/jazzy/)
+* [Gazebo Harmonic](https://gazebosim.org/)
+* [RTAB-Map ROS 2](https://github.com/introlab/rtabmap_ros)
+* [RTABMap-ROS2-PX4 (monemati)](https://github.com/monemati/RTABMap-ROS2-PX4)
+
+---
