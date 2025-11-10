@@ -41,8 +41,8 @@ source ~/px4-venv/bin/activate
 ### 2. Клонировать проект
 
 ```bash
-git clone https://github.com/Placebek/px4-jazzy-gazebo-lidar.git
-cd px4-jazzy-gazebo-lidar
+git clone https://github.com/Placebek/px4-jazzy-x500-lidar.git
+cd px4-jazzy-x500-lidar
 ```
 
 ### 3. Установить PX4-Autopilot (v1.15.0)
@@ -95,7 +95,7 @@ sudo ldconfig /usr/local/lib/
 
 ```bash
 source /opt/ros/jazzy/setup.bash
-export GZ_SIM_RESOURCE_PATH=/opt/ros/jazzy/share:~/PX4-Autopilot/Tools/simulation/gz/models:~/px4-jazzy-gazebo-lidar/models
+export GZ_SIM_RESOURCE_PATH=/opt/ros/jazzy/share:~/PX4-Autopilot/Tools/simulation/gz/models:~/px4-jazzy-x500-lidar/models
 export GZ_SIM_WORLD_PATH=~/PX4-Autopilot/Tools/simulation/gz/worlds
 ```
 
@@ -108,9 +108,9 @@ source ~/.bashrc
 Скопируйте модели и миры:
 
 ```bash
-cp -f ~/px4-jazzy-gazebo-lidar/models/* ~/PX4-Autopilot/Tools/simulation/gz/models
-cp -f ~/px4-jazzy-gazebo-lidar/worlds/* ~/PX4-Autopilot/Tools/simulation/gz/worlds
-cp -f ~/px4-jazzy-gazebo-lidar/airframes/* ~/PX4-Autopilot/ROMFS/px4fmu_common/init.d-posix/airframes
+cp -f ~/px4-jazzy-x500-lidar/models/* ~/PX4-Autopilot/Tools/simulation/gz/models
+cp -f ~/px4-jazzy-x500-lidar/worlds/* ~/PX4-Autopilot/Tools/simulation/gz/worlds
+cp -f ~/px4-jazzy-x500-lidar/airframes/* ~/PX4-Autopilot/ROMFS/px4fmu_common/init.d-posix/airframes
 ```
 
 Пересоберите PX4:
